@@ -12,3 +12,28 @@ Vue.component('card', {
     </div>
     `,
 })
+
+
+let app = new Vue({
+    el: '#app',
+    data: {
+        columns: [
+            {
+                title: "Запланированные задачи",
+                card: []
+            },
+            {
+                title: "В работе",
+                card: []
+            },
+            {
+                title: "Тестирование",
+                card: []
+            },
+            {
+                title: "Выполненные задачи",
+                card: []
+            }
+        ]
+    }
+})
