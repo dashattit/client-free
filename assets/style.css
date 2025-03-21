@@ -43,3 +43,15 @@ body {
 .card-content {
     margin-top: 10px;
 }
+
+.deadline-block {
+    margin-bottom: 10px;
+}
+
+.card-actions {
+    margin-top: 10px;
+}
+
+.card-actions button {
+    margin: 5px;
+}
