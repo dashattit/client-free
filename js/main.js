@@ -1,17 +1,24 @@
 // компонент для самой карточки
 Vue.component('card', {
-    props: ['title'],
+    props: ['card', 'index', 'columnIndex', 'isEditing'],
     template: `
     <div class="card">
         <div class="card-header">
-            <span>{{ card.title }}</span>
+            <span v-if="!isEditing">{{ card.title }}</span>
+            <input v-else type="text" v-model="card.title" placeholder="Название карточки">
+            
         </div>
         <div class="card-content">
-            <p>{{ card.description }}</p>
+            <p v-if="!isEditing">{{ card.description }}</p>
+            <textarea v-else v-model="card.description" placeholder="Описание задачи">
+            <p>Создано: {{ card.createdAt }}</p>
+            <p v-if="card.editedAt">Отредактировано: {{ card.editedAt }}</p>
+            <p class="deadline" v-if="!isEditing">Дэдлайн: {{ card.editedAt }}</p>
+            <input v-else type="date" v-model="card.deadline" placeholder="Дэдлайн">
         </div>
     </div>
     `,
-})
+});
 
 
 let app = new Vue({
