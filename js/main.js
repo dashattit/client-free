@@ -20,6 +20,15 @@ Vue.component('card', {
     `,
 });
 
+// компонент для канбан-доски
+Vue.component('kanban-task', {
+    props: ['columns', 'newCard', 'editingIndex'],
+    template: `
+        <div class="board">
+            
+        </div>
+    `,
+});
 
 let app = new Vue({
     el: '#app',
@@ -62,7 +71,14 @@ let app = new Vue({
                     editedAt: ""
                 };
                 this.columns[0].cards.push(card);
+                this.newCard = {
+                    title: "",
+                    description: "",
+                    deadline: "",
+                    createdAt: "",
+                    editedAt: "",
+                };
             }
-        }
+        },
     }
 })
