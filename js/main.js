@@ -6,7 +6,11 @@ Vue.component('card', {
         <div class="card-header">
             <span v-if="!isEditing">{{ card.title }}</span>
             <input v-else type="text" v-model="card.title" placeholder="Название карточки">
-            
+            <button @click="$root.deleteCard(index)" v-if="columnIndex === 0">Удалить</button>
+            <button @click="$root.editCard(index)" v-if="columnIndex === 0 && !isEditing">Редактировать</button>
+            <button @click="$root.saveCard(index)" v-if="columnIndex === 0 && isEditing">Удалить</button>
+            <button @click="$root.moveCard(index)" v-if="columnIndex === 0">Переместить</button>
+
         </div>
         <div class="card-content">
             <p v-if="!isEditing">{{ card.description }}</p>
@@ -25,7 +29,16 @@ Vue.component('kanban-task', {
     props: ['columns', 'newCard', 'editingIndex'],
     template: `
         <div class="board">
-            
+            <div v-for="(column, columnIndex) in columns :key="columnIndex" class="column">
+                <h2>{{ column.title }}</h2>
+                <div v-if="columnIndex" === 0>
+                    <input type="text" v-model="newCard.title" placeholder="Название карточки"><br><br>
+                    <textarea v-model="newCard.description" placeholder="Описание задачи"></textarea><br><br>
+                    <input type="date" v-model="newCard.deadline" placeholder="Дэдлайн">
+                    <button>Добавить карточку</button>
+                </div><br>
+                <card v-for="(card, cardIndex) in column.cards" :key="cardIndex" :card="card" :index="cardIndex" :column-index="columnIndex">
+            </div>
         </div>
     `,
 });
