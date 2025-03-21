@@ -34,6 +34,28 @@ let app = new Vue({
                 title: "Выполненные задачи",
                 card: []
             }
-        ]
+        ],
+        newCard: {
+            title: '',
+            description: '',
+            deadline: '',
+            createdAt: '',
+            editedAt: ''
+        },
+        editingIndex: null
+    },
+    methods: {
+        addCard() {
+            if (this.newCard && this.newCard.description && this.newCard.deadline) {
+                const card = {
+                    title: this.newCard.title,
+                    description: this.newCard.description,
+                    deadline: this.newCard.deadline,
+                    createdAt: new Date().toLocaleString(),
+                    editedAt: ""
+                };
+                this.columns[0].cards.push(card);
+            }
+        }
     }
 })
