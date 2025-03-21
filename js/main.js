@@ -17,7 +17,7 @@ Vue.component('card', {
             <textarea v-else v-model="card.description" placeholder="Описание задачи">
             <p>Создано: {{ card.createdAt }}</p>
             <p v-if="card.editedAt">Отредактировано: {{ card.editedAt }}</p>
-            <p class="deadline" v-if="!isEditing">Дэдлайн: {{ card.editedAt }}</p>
+            <p class="deadline" v-if="!isEditing">Дэдлайн: {{ card.deadline }}</p>
             <input v-else type="date" v-model="card.deadline" placeholder="Дэдлайн">
         </div>
     </div>
@@ -35,7 +35,7 @@ Vue.component('kanban-task', {
                     <input type="text" v-model="newCard.title" placeholder="Название карточки"><br><br>
                     <textarea v-model="newCard.description" placeholder="Описание задачи"></textarea><br><br>
                     <input type="date" v-model="newCard.deadline" placeholder="Дэдлайн">
-                    <button>Добавить карточку</button>
+                    <button @click="$root.addCard()">Добавить карточку</button>
                 </div><br>
                 <card v-for="(card, cardIndex) in column.cards" :key="cardIndex" :card="card" :index="cardIndex" :column-index="columnIndex">
             </div>
@@ -43,6 +43,7 @@ Vue.component('kanban-task', {
     `,
 });
 
+// главный экземпляр
 let app = new Vue({
     el: '#app',
     data: {
@@ -93,5 +94,22 @@ let app = new Vue({
                 };
             }
         },
-    }
+        deleteCard(index) {
+            this.columns[0].cards.splice(index, 1);
+        },
+        editCard(index) {
+            this.editingIndex = index;
+        },
+        saveCard(index) {
+            const card = this.columns[0].cards[index];
+            card.editedAt = new Date().toLocaleString();
+        },
+        moveCard(index) {
+            const card = this.columns[0].cards[index];
+            this.columns[1].cards.push(card);
+        }
+    },
+    template: `
+    <kanban-task :columns="columns" :new-card="newCard" :editing-index="editingIndex"></kanban-task>
+    `,
 })
