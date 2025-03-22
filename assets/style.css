@@ -10,14 +10,21 @@ body {
 
 .column {
     width: 20%;
-    background-color: #f0f0f0;
+    background-color: #e6e6e6;
     padding: 10px;
     border-radius: 5px;
     border: 1px solid #ddd;
 }
 
+.column button {
+    padding: 3px;
+    border-radius: 5px;
+    border: 1px solid #8a8a8a;
+    background-color: #8dbcfa;
+}
+
 .card {
-    background-color: #fff;
+    background-color: #cccccc;
     padding: 10px;
     border: 1px solid #ddd;
     margin-bottom: 10px;
@@ -36,16 +43,18 @@ body {
     cursor: pointer;
 }
 
-.card-header button:hover {
-    color: blue;
-}
-
 .card-content {
     margin-top: 10px;
 }
 
+.card-content button {
+    background-color: #8a8a8a;
+
+}
+
 .deadline-block {
     margin-bottom: 10px;
+    color: red;
 }
 
 .card-actions {
@@ -54,5 +63,9 @@ body {
 
 .card-actions button {
     margin: 5px;
+    background-color: #80b8ff;
+    border-radius: 5px;
+    padding: 5px;
+    border: 1px solid #8a8a8a;
 }
 

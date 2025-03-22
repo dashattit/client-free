@@ -1,3 +1,4 @@
+// компонент для самой карточки
 Vue.component('card', {
     props: ['card', 'index', 'columnIndex', 'isEditing'],
     template: `
@@ -37,6 +38,7 @@ Vue.component('card', {
     `,
 });
 
+// компонент для доски
 Vue.component('kanban-task', {
     props: ['columns', 'newCard', 'editingIndex', 'editingColumnIndex', 'returnReason'],
     template: `
@@ -49,7 +51,16 @@ Vue.component('kanban-task', {
                     <input type="date" v-model="newCard.deadline" placeholder="Дэдлайн">
                     <button @click="$root.addCard()">Добавить карточку</button>
                 </div><br>
-                <card v-for="(card, cardIndex) in column.cards" :key="cardIndex" :card="card" :index="cardIndex" :column-index="columnIndex" :is-editing="editingIndex === cardIndex && editingColumnIndex === columnIndex">
+                <div v-for="(card, cardIndex) in column.cards" :key="cardIndex">
+                    <card :card="card" :index="cardIndex" :column-index="columnIndex" :is-editing="editingIndex === cardIndex && editingColumnIndex === columnIndex"></card>
+                    <div v-if="columnIndex === 3" 
+                         :style="{ 
+                             color: card.status === 'Просрочена' ? 'red' : 'green',
+                             fontWeight: 'bold',
+                             marginTop: '10px'
+                         }">
+                        {{ card.status }}
+                    </div>
             </div>
         </div>
     `,
@@ -85,9 +96,10 @@ let app = new Vue({
         },
         editingIndex: null,
         editingColumnIndex: null,
-        returnReason: '' // Добавлено поле для хранения причины возврата
+        returnReason: ''
     },
     methods: {
+        // добавление карточки
         addCard() {
             if (this.newCard.title && this.newCard.description && this.newCard.deadline) {
                 const card = {
@@ -104,24 +116,29 @@ let app = new Vue({
                     deadline: "",
                     createdAt: "",
                     editedAt: "",
+                    status: ""
                 };
             }
         },
+        // метод для удаления карточки
         deleteCard(index, columnIndex) {
             this.columns[columnIndex].cards.splice(index, 1);
             this.editingIndex = null;
             this.editingColumnIndex = null;
         },
+        // метод для редактирования карточки
         editCard(index, columnIndex) {
             this.editingIndex = index;
             this.editingColumnIndex = columnIndex;
         },
+        // метод для сохранения изменений
         saveCard(index, columnIndex) {
             const card = this.columns[columnIndex].cards[index];
             card.editedAt = new Date().toLocaleString();
             this.editingIndex = null;
             this.editingColumnIndex = null;
         },
+        // метод для перемещения из первого столбца во вторую
         moveCard(index) {
             const card = this.columns[0].cards[index];
             this.columns[1].cards.push(card);
@@ -129,6 +146,7 @@ let app = new Vue({
             this.editingIndex = null;
             this.editingColumnIndex = null;
         },
+        // метод для перемещения в третий столбец
         moveCardToTest(index) {
             const card = this.columns[1].cards[index];
             this.columns[2].cards.push(card);
@@ -136,6 +154,7 @@ let app = new Vue({
             this.editingIndex = null;
             this.editingColumnIndex = null;
         },
+        // метод для перемещения из второго столбца в первый
         moveCardBack(index) {
             const card = this.columns[1].cards[index];
             this.columns[0].cards.push(card);
@@ -143,6 +162,7 @@ let app = new Vue({
             this.editingIndex = null;
             this.editingColumnIndex = null;
         },
+        // метод для перемещения из третьего столбца обратно во второй
         moveCardBackToWork(index) {
             const card = this.columns[2].cards[index];
             this.columns[1].cards.push(card);
@@ -150,13 +170,24 @@ let app = new Vue({
             this.editingIndex = null;
             this.editingColumnIndex = null;
         },
+        // метод для перемещения из третьего в четвертый
         moveCardToDone(index) {
             const card = this.columns[2].cards[index];
+            const deadlineDate = new Date(card.deadline);
+            const currentDate = new Date();
+
+            if (currentDate > deadlineDate) {
+                card.status = "Просрочена";
+            } else {
+                card.status = "Выполнена в срок";
+            }
+
             this.columns[3].cards.push(card);
             this.columns[2].cards.splice(index, 1);
             this.editingIndex = null;
             this.editingColumnIndex = null;
         },
+        // метод для перемещения из четвертой в третью
         moveCardBackToTest(index) {
             const card = this.columns[3].cards[index];
             this.columns[2].cards.push(card);
@@ -164,12 +195,12 @@ let app = new Vue({
             this.editingIndex = null;
             this.editingColumnIndex = null;
         },
-        // Добавлен метод для возврата в работу с указанием причины
+        // метод для возврата "в работу"
         returnToWork(index) {
             this.returnReason = prompt("Введите причину возврата в работу");
             if (this.returnReason) {
                 const card = this.columns[2].cards[index];
-                card.returnReason = this.returnReason; // Добавление причины возврата к карточке
+                card.returnReason = this.returnReason;
                 this.columns[1].cards.push(card);
                 this.columns[2].cards.splice(index, 1);
                 this.editingIndex = null;
