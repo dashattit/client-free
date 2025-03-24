@@ -16,6 +16,16 @@ Vue.component('card', {
                 <p class="deadline" v-if="!isEditing">Дэдлайн: {{ card.deadline }}</p>
                 <input v-else type="date" v-model="card.deadline" placeholder="Дэдлайн">
             </div>
+            <p v-if="!isEditing" class="priority-label" :class="'priority-' + card.priority">
+                Приоритет: {{ card.priority }}
+            </p>
+            <select v-else v-model="card.priority" class="priority-select">
+                <option value="1">1 (Низкий)</option>
+                <option value="2">2</option>
+                <option value="3">3 (Средний)</option>
+                <option value="4">4</option>
+                <option value="5">5 (Высокий)</option>
+            </select>
             <p v-if="card.returnReason">Причина возврата: {{ card.returnReason }}</p>
             <div class="card-actions" v-if="isEditing">
                 <button @click="$root.saveCard(index, columnIndex)">Сохранить</button>
@@ -35,7 +45,7 @@ Vue.component('card', {
             </div>
         </div>
     </div>
-    `,
+    `
 });
 
 // компонент для доски
@@ -48,7 +58,14 @@ Vue.component('kanban-task', {
                 <div v-if="columnIndex === 0">
                     <input type="text" v-model="newCard.title" placeholder="Название карточки"><br><br>
                     <textarea v-model="newCard.description" placeholder="Описание задачи"></textarea><br><br>
-                    <input type="date" v-model="newCard.deadline" placeholder="Дэдлайн">
+                    <input type="date" v-model="newCard.deadline" placeholder="Дэдлайн"><br><br>
+                    <select v-model="newCard.priority" class="priority-select">
+                        <option value="1">1 (Низкий)</option>
+                        <option value="2">2</option>
+                        <option value="3">3 (Средний)</option>
+                        <option value="4">4</option>
+                        <option value="5">5 (Высокий)</option>
+                    </select><br>
                     <button @click="$root.addCard()">Добавить карточку</button>
                 </div><br>
                 <div v-for="(card, cardIndex) in column.cards" :key="cardIndex">
@@ -61,9 +78,10 @@ Vue.component('kanban-task', {
                          }">
                         {{ card.status }}
                     </div>
+                </div>
             </div>
         </div>
-    `,
+    `
 });
 
 let app = new Vue({
@@ -91,6 +109,7 @@ let app = new Vue({
             title: '',
             description: '',
             deadline: '',
+            priority: '3',
             createdAt: '',
             editedAt: ''
         },
@@ -99,78 +118,69 @@ let app = new Vue({
         returnReason: ''
     },
     methods: {
-        // добавление карточки
         addCard() {
             if (this.newCard.title && this.newCard.description && this.newCard.deadline) {
                 const card = {
                     title: this.newCard.title,
                     description: this.newCard.description,
                     deadline: this.newCard.deadline,
+                    priority: this.newCard.priority,
                     createdAt: new Date().toLocaleString(),
                     editedAt: ""
                 };
                 this.columns[0].cards.push(card);
+                this.columns[0].cards.sort((a, b) => a.priority - b.priority);
+                
                 this.newCard = {
                     title: "",
                     description: "",
                     deadline: "",
+                    priority: "3",
                     createdAt: "",
                     editedAt: "",
                     status: ""
                 };
             }
         },
-        // метод для удаления карточки
-        deleteCard(index, columnIndex) {
-            this.columns[columnIndex].cards.splice(index, 1);
-            this.editingIndex = null;
-            this.editingColumnIndex = null;
-        },
-        // метод для редактирования карточки
-        editCard(index, columnIndex) {
-            this.editingIndex = index;
-            this.editingColumnIndex = columnIndex;
-        },
-        // метод для сохранения изменений
         saveCard(index, columnIndex) {
             const card = this.columns[columnIndex].cards[index];
             card.editedAt = new Date().toLocaleString();
+            this.columns[columnIndex].cards.sort((a, b) => a.priority - b.priority);
             this.editingIndex = null;
             this.editingColumnIndex = null;
         },
-        // метод для перемещения из первого столбца во вторую
         moveCard(index) {
             const card = this.columns[0].cards[index];
             this.columns[1].cards.push(card);
             this.columns[0].cards.splice(index, 1);
+            this.columns[1].cards.sort((a, b) => a.priority - b.priority);
             this.editingIndex = null;
             this.editingColumnIndex = null;
         },
-        // метод для перемещения в третий столбец
         moveCardToTest(index) {
             const card = this.columns[1].cards[index];
             this.columns[2].cards.push(card);
             this.columns[1].cards.splice(index, 1);
+            this.columns[2].cards.sort((a, b) => a.priority - b.priority);
             this.editingIndex = null;
             this.editingColumnIndex = null;
         },
-        // метод для перемещения из второго столбца в первый
         moveCardBack(index) {
             const card = this.columns[1].cards[index];
             this.columns[0].cards.push(card);
             this.columns[1].cards.splice(index, 1);
+            this.columns[0].cards.sort((a, b) => a.priority - b.priority);
             this.editingIndex = null;
             this.editingColumnIndex = null;
         },
-        // метод для перемещения из третьего столбца обратно во второй
         moveCardBackToWork(index) {
             const card = this.columns[2].cards[index];
             this.columns[1].cards.push(card);
             this.columns[2].cards.splice(index, 1);
+            this.columns[1].cards.sort((a, b) => a.priority - b.priority);
             this.editingIndex = null;
             this.editingColumnIndex = null;
         },
-        // метод для перемещения из третьего в четвертый
         moveCardToDone(index) {
             const card = this.columns[2].cards[index];
             const deadlineDate = new Date(card.deadline);
@@ -184,18 +194,27 @@ let app = new Vue({
 
             this.columns[3].cards.push(card);
             this.columns[2].cards.splice(index, 1);
+            this.columns[3].cards.sort((a, b) => a.priority - b.priority);
             this.editingIndex = null;
             this.editingColumnIndex = null;
         },
-        // метод для перемещения из четвертой в третью
         moveCardBackToTest(index) {
             const card = this.columns[3].cards[index];
             this.columns[2].cards.push(card);
             this.columns[3].cards.splice(index, 1);
+            this.columns[2].cards.sort((a, b) => a.priority - b.priority);
             this.editingIndex = null;
             this.editingColumnIndex = null;
         },
-        // метод для возврата "в работу"
+        deleteCard(index, columnIndex) {
+            this.columns[columnIndex].cards.splice(index, 1);
+            this.editingIndex = null;
+            this.editingColumnIndex = null;
+        },
+        editCard(index, columnIndex) {
+            this.editingIndex = index;
+            this.editingColumnIndex = columnIndex;
+        },
         returnToWork(index) {
             this.returnReason = prompt("Введите причину возврата в работу");
             if (this.returnReason) {
@@ -203,6 +222,7 @@ let app = new Vue({
                 card.returnReason = this.returnReason;
                 this.columns[1].cards.push(card);
                 this.columns[2].cards.splice(index, 1);
+                this.columns[1].cards.sort((a, b) => a.priority - b.priority);
                 this.editingIndex = null;
                 this.editingColumnIndex = null;
             }
@@ -210,5 +230,5 @@ let app = new Vue({
     },
     template: `
     <kanban-task :columns="columns" :new-card="newCard" :editing-index="editingIndex" :editing-column-index="editingColumnIndex" :return-reason="returnReason"></kanban-task>
-    `,
+    `
 });
